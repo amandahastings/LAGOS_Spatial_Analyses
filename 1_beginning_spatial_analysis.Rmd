@@ -123,7 +123,7 @@ nrow(minnesota_lakes)-nrow(istate_lakes)
 
 ```
 
-There are 16446 sites in Illinois and Iowa combined. Meanwhile, there are 29038 Minnesota sites, exceeding the number of sites in Illinois/Iowa by 12572 sites. 
+There are 16446 sites in Illinois and Iowa combined. Meanwhile, there are 29038 Minnesota sites, exceeding the number of sites in Illinois/Iowa by 12572 sites.
 
 
 ## 3) What is the distribution of lake size in Iowa vs. Minnesota?
@@ -137,6 +137,8 @@ iowa <- states %>%
   st_transform(2163)
 
 iowa_lakes <- spatial_lakes[iowa,]
+
+## Need to fix with facet wrap
 
 ggplot(iowa_lakes, aes(x=lake_area_ha))+ 
   geom_histogram(bins=40)+ 
