@@ -212,7 +212,22 @@ observations?
 
 ```{r}
 ## Your code here
+secchi200_locus <- inner_join(chla_secchi_200, lake_centers, by='lagoslakeid') %>% 
+  select(lagoslakeid, nhd_long, nhd_lat, secchi)
 
+spatial_secchi200 <- st_as_sf(secchi200_locus,coords=c('nhd_long','nhd_lat'),
+                          crs=4326)
+
+mapview(spatial_secchi200, zcol='secchi')
+
+# secchi_locus <- inner_join(chla_secchi, lake_centers, by='lagoslakeid') %>% 
+#   select(lagoslakeid,nhd_long, nhd_lat, secchi)
+# 
+# spatial_secchi <- st_as_sf(secchi_locus,coords=c('nhd_long','nhd_lat'),
+#                           crs=4326)
+
+
+  
 ```
 
 
