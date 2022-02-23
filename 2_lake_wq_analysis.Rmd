@@ -122,79 +122,90 @@ mapview(mean_spatial,zcol='log10_mean_chl')
 
 # Class work
 
-## 1) What is the correlation between Secchi Disk Depth and Chlorophyll a for sites with at least 200 observations?
+## 1) What is the correlation between Secchi Disk Depth and Chlorophyll a for 
+sites with at least 200 observations?
 
 - Here, I just want a plot of chla vs secchi for all sites 
 
 ```{r}
-#Your code here
+#Plot secchi disk depth by cholorphyll a 
+library(ggthemes)
 ggplot(chla_secchi_200, aes(x = secchi, y = chla)) +
-  geom_point(shape = 1)+ 
+  geom_point(shape = 1, color="#48680E")+ 
+  theme_few()+
   labs(y="Chlorophyll A", x="Secchi Disk Depth")+ 
   xlim(0,16)
 
 cor.test(chla_secchi_200$chla,chla_secchi_200$secchi)
 ```
 
-There is a negative correlation between secchi disk depth and chlorophyll a levels, where higher chlorophyll a levels are associated with shallower secchi disk depths. 
+There is a negative correlation between secchi disk depth and chlorophyll a levels, where shallower secchi disk depths are associated with higher chlorophyll a levels. 
 
 
 ## Why might this be the case? 
 
-High cholorphyll a concentrations are associated with high biomass of photosynthetic organisms, such as algae. Meanwhile, secchi disks are used to assess water turbidity, where the depth of disk disappearance indicates the transparency of the water(). 
+High cholorphyll a concentrations are associated with high biomass of photosynthetic organisms, such as algae. Meanwhile, secchi disks are used to assess water turbidity, where the depth of disk disappearance indicates the transparency of the water(epa.gov). 
 
+[epa.gov] 
 
 Tilzer, M. M. (1988). Secchi disk - chlorophyll relationships in a lake with highly variable phytoplankton biomass. Hydrobiologia, 162(2), 163–171. https://doi.org/10.1007/BF00014539
 
 ## 2) What states have the most data? 
 
-### 2a) First you will need to make a lagos spatial dataset that has the total number of counts per site.
+### 2a) First you will need to make a lagos spatial dataset that has the total 
+number of counts per site.
 
 ```{r}
-## Your code here
 #Create lagos spatial dataset with total number of counts per site 
 
 site_counts <- lake_centers %>%
   group_by(lagoslakeid) %>%
-  mutate(count = n()) %>%
+  mutate(count = n())
   select(lagoslakeid,nhd_long,nhd_lat, count, state_zoneid)
 
-states_lagos <- lagos$state %>% 
+#Parse out lagos states data to be joined to original lagos spatial dataset  
+  
+states_lagos <- lagos$state %>%
   select(-state_pct_in_nwi, -state_ha_in_nwi,-state_ha)
 
+#Join by state_zoneid 
 
 stateid_counts <- inner_join(site_counts, states_lagos, by="state_zoneid")
+
+state_sums <- stateid_counts %>%
+  group_by(state_name) %>%
+  summarize(sum_counts = sum(count))
+
   
 ```
 
 
-### 2b) Second, you will need to join this point dataset to the us_boundaries data. 
+### 2b) Second, you will need to join this point dataset to the us_boundaries data.
+
+### 2c) Then you will want to group by state and sum all the observations in 
+that state and arrange that data from most to least total observations per state. 
 
 ```{r}
-## Your code here
-states <- us_states()%>% 
-  select(state_name, geometry)
+#Join us_states data to lagos dataset by state_name 
 
-spatial_counts <- st_as_sf(stateid_counts,coords=c('nhd_long','nhd_lat'),
-                          crs=4326)
+states <- us_states()
 
-# states_join <- inner_join(spatial_counts,stateid_counts,by='state_name')
+#Arrange summed counts in descending order 
 
+states_join <- inner_join(states,state_sums,by='state_name') %>% 
+  arrange(desc(sum_counts)) %>% 
+  select(state_name,sum_counts)
 
-mapview(spatial_counts)
+#Plot summed counts by state
+
+mapview(states_join, zcol='sum_counts')
+
+head(states_join)
 
 ```
 
+The top five states with the most data include: Minnesota, Michigan, Wisconsin, New York, and Illinois. 
 
-### 2c) Then you will want to group by state and sum all the observations in that
-state and arrange that data from most to least total observations per state. 
-
-```{r}
-## Your code here. 
-spatial_sums <- spatial_counts %>%
-  group_by(state_name) %>%
-  summarize(sum_counts = sum(count))
-```
 
 ##3 Is there a spatial pattern in Secchi disk depth for lakes with at least 200 
 observations?

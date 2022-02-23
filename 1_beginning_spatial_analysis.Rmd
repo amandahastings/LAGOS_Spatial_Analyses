@@ -158,7 +158,7 @@ ggplot(minnesota_lakes, aes(x=lake_area_ha))+
 istate_lakes %>%
   arrange(-lake_area_ha) %>%
   slice(1:1000) %>%
-  mapview(., zcol = 'lake_area_ha')
+  mapview(., zcol = 'lake_area_ha', at=c(0,100,250,500,1000,2500,5000,10000))
 ```
 
 
