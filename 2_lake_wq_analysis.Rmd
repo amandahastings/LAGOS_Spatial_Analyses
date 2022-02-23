@@ -160,8 +160,8 @@ number of counts per site.
 
 site_counts <- lake_centers %>%
   group_by(lagoslakeid) %>%
-  mutate(count = n())
-  select(lagoslakeid,nhd_long,nhd_lat, count, state_zoneid)
+  mutate(count = n()) %>%
+  select(lagoslakeid, nhd_long, nhd_lat, count, state_zoneid)
 
 #Parse out lagos states data to be joined to original lagos spatial dataset  
   
