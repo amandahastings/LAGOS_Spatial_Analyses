@@ -136,6 +136,10 @@ ggplot(chla_secchi_200, aes(x = secchi, y = chla)) +
   labs(y="Chlorophyll A", x="Secchi Disk Depth")+ 
   xlim(0,16)
 
+```
+
+
+```{r include=FALSE}
 cor.test(chla_secchi_200$chla,chla_secchi_200$secchi)
 ```
 
@@ -144,7 +148,7 @@ There is a negative correlation between secchi disk depth and chlorophyll a leve
 
 ## Why might this be the case? 
 
-High cholorphyll a concentrations are associated with high biomass of photosynthetic organisms, such as algae. Meanwhile, secchi disks are used to assess water turbidity, where the depth of disk disappearance indicates the transparency of the water(epa.gov). 
+High cholorphyll a concentrations are associated with high biomass of photosynthetic organisms, such as algae. Meanwhile, secchi disks are used to assess water turbidity, where the depth of disk disappearance indicates the transparency of the water(epa.gov). Where 
 
 [epa.gov] 
 
@@ -158,23 +162,33 @@ number of counts per site.
 ```{r}
 #Create lagos spatial dataset with total number of counts per site 
 
-site_counts <- lake_centers %>%
+site_counts <- chla_secchi %>%
   group_by(lagoslakeid) %>%
-  mutate(count = n()) %>%
-  select(lagoslakeid, nhd_long, nhd_lat, count, state_zoneid)
+  mutate(count = n())
 
+#Add geographic information to site counts data 
+geo_counts <- inner_join(site_counts,lake_centers, by= 'lagoslakeid')%>% 
+  select(lagoslakeid,nhd_long,nhd_lat, count, secchi, chla)
+
+#Create spatial object for lagos dataset 
+spatial_counts <- st_as_sf(geo_counts,coords=c('nhd_long','nhd_lat'),
+                          crs=4326)
+
+###Option 1: Use state_zoneid to join data 
 #Parse out lagos states data to be joined to original lagos spatial dataset  
   
-states_lagos <- lagos$state %>%
-  select(-state_pct_in_nwi, -state_ha_in_nwi,-state_ha)
-
-#Join by state_zoneid 
-
-stateid_counts <- inner_join(site_counts, states_lagos, by="state_zoneid")
-
-state_sums <- stateid_counts %>%
-  group_by(state_name) %>%
-  summarize(sum_counts = sum(count))
+# states_lagos <- lagos$state %>%
+#   select(-state_pct_in_nwi, -state_ha_in_nwi,-state_ha)
+# 
+# #Join lagos state data and original lagos spatial data by state_zoneid field 
+# 
+# stateid_counts <- full_join(site_counts, states_lagos, by="state_zoneid")
+# 
+# #Calculate the sum of counts per state 
+# 
+# state_sums <- stateid_counts %>%
+#   group_by(state_name) %>%
+#   summarize(sum_counts = sum(count))
 
   
 ```
@@ -182,27 +196,53 @@ state_sums <- stateid_counts %>%
 
 ### 2b) Second, you will need to join this point dataset to the us_boundaries data.
 
+```{r}
+###Option 2: Use a spatial join to combine point dataset and us_boundaries data 
+#Parse out state boundaries from us_boundaries data   
+
+states <- us_states()
+
+
+#Use spatial join to overlay point dataset (original lagos spatial dataset) and state boundaries 
+overlay <- st_join(spatial_counts,states)
+
+```
+
+
 ### 2c) Then you will want to group by state and sum all the observations in 
 that state and arrange that data from most to least total observations per state. 
 
 ```{r}
-#Join us_states data to lagos dataset by state_name 
-
-states <- us_states()
-
+###Option 1:
+#Join us_states data to lagos dataset by state_name
 #Arrange summed counts in descending order 
 
-states_join <- inner_join(states,state_sums,by='state_name') %>% 
-  arrange(desc(sum_counts)) %>% 
-  select(state_name,sum_counts)
+# states_join <- inner_join(states,state_sums,by='state_name') %>% 
+#   arrange(desc(sum_counts)) %>% 
+#   select(state_name,sum_counts)
 
 #Plot summed counts by state
 
-mapview(states_join, zcol='sum_counts')
-
-head(states_join)
+# mapview(states_join, zcol='sum_counts', layer.name = 'Observations per state',canvas=TRUE)
+# 
+# head(states_join)
 
 ```
+
+
+```{r}
+# #Option 2: 
+# Group by state, sum number of observations by state
+summed_overlay <- overlay %>%
+  group_by(state_name) %>%
+  summarize(sum_count = sum(count)) %>%
+  arrange(desc(sum_count))
+
+# head(summed_overlay)
+  
+  
+```
+
 
 The top five states with the most data include: Minnesota, Michigan, Wisconsin, New York, and Illinois. 
 
@@ -212,22 +252,21 @@ observations?
 
 ```{r}
 ## Your code here
-secchi200_locus <- inner_join(chla_secchi_200, lake_centers, by='lagoslakeid') %>% 
-  select(lagoslakeid, nhd_long, nhd_lat, secchi)
+
+secchi200 <- chla_secchi %>%
+  group_by(lagoslakeid) %>%
+  summarize(mean_secchi = mean(secchi), count = n()) %>%
+  filter(count > 200)
+  
+
+secchi200_locus <- inner_join(secchi200, lake_centers, by='lagoslakeid') %>%
+  select(lagoslakeid, nhd_long, nhd_lat, mean_secchi)
 
 spatial_secchi200 <- st_as_sf(secchi200_locus,coords=c('nhd_long','nhd_lat'),
                           crs=4326)
 
-mapview(spatial_secchi200, zcol='secchi')
+mapview(spatial_secchi200, zcol='mean_secchi', layer.name='Secchi Disk Depth', canvas=TRUE)
 
-# secchi_locus <- inner_join(chla_secchi, lake_centers, by='lagoslakeid') %>% 
-#   select(lagoslakeid,nhd_long, nhd_lat, secchi)
-# 
-# spatial_secchi <- st_as_sf(secchi_locus,coords=c('nhd_long','nhd_lat'),
-#                           crs=4326)
-
-
-  
 ```
 
-
+I do not see a strong spatial pattern in secchi disk depth in lakes with at least 200 observations. 
