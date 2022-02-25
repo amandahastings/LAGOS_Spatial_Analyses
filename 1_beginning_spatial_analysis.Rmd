@@ -106,7 +106,7 @@ i_states <- states %>%
   filter(name %in% c('Iowa','Illinois')) %>% 
   st_transform(2163)
 
-mapview(i_states)
+mapview(i_states, layer.name='States of Interest')
 
 ```
 
@@ -175,9 +175,11 @@ Additional data sources for investigating reservoir and natural lake size includ
 
 *The HydroLAKES dataset combines information from multiple lake datasets, including NASA SRTM, Water Body Data, and the Global Lakes and Wetlands Database (Meyer et al. 2020). This dataset consists of shapefiles with attributes such as lake surface area, total volume, average depth, geographic coordinates of pour points, and more (Meyer er al. 2020). 
 
-*The Global Surface Water Dataset, derived from LANDSAT imagery and hosted by the Joint Research Centre (JRC),  Subsetted data from this dataset are availabile via Google Earth Engine (Meyer et al. 2020).
+*The Global Surface Water Dataset, derived from LANDSAT imagery and hosted by the Joint Research Centre (JRC), provides information regarding surface water area for lakes, as well as rivers, streams, and wetlands (Meyer et al. 2020). A subset of this data based upon yearly water classification history is available via Google Earth Engine (Meyer et al. 2020). 
+
+*Also, the [Central Midwest Water Science Center](https://www.usgs.gov/centers/cm-water/science/real-time-data-links?qt-science_center_objects=0#qt-science_center_objects) is another resource, for Iowa and Illinois lake data specifically.
 
 Reference:
 
-Meyer, MF, Labou, SG, Cramer, AN, Brousil, MR, & Luff, BT. (2020). The global lake area, climate, and population dataset. Scientific Data, 7(1), 1–12. [https://doi.org/10.1038/s41597-020-0517-4]
+Meyer, MF, Labou, SG, Cramer, AN, Brousil, MR, & Luff, BT. (2020). The global lake area, climate, and population dataset. Scientific Data, 7(1), 1–12. https://doi.org/10.1038/s41597-020-0517-4
 
