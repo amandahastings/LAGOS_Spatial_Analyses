@@ -156,19 +156,6 @@ ggplot(minnesota_lakes, aes(x=lake_area_ha))+
 
 The distributions of lake size for both Iowa and Minnesota are positively skewed. Generally, Iowa lake size is smaller than Minnesota.
 
-
-```{r}
-#figuring out facet wrap
-# all_spatial_lakes <- bind_rows(iowa_lakes,minnesota_lakes)
-# 
-# ggplot(all_spatial_lakes, aes(x=lake_area_ha))+ 
-#   geom_histogram(bins=40)+ 
-#   scale_x_log10()+
-#   labs(x= "Lake size (hectares)", y= "Frequency")+ 
-#   facet_wrap()
-```
-
-
 ## 4) Make an interactive plot of lakes in Iowa and Illinois and color them by lake area in hectares. 
 
 ```{r}
@@ -182,4 +169,15 @@ istate_lakes %>%
 ## 5) What other data sources might we use to understand how reservoirs and natural lakes vary in size in these three states? 
 
 
+Additional data sources for investigating reservoir and natural lake size include: 
+
+*The Global Lake area, Climate, and Population (GLCP) dataset is comprised of lake surface area data (from the datasets listed below), as well as temperature, precipitation, and population data (Meyer et al. 2020).
+
+*The HydroLAKES dataset combines information from multiple lake datasets, including NASA SRTM, Water Body Data, and the Global Lakes and Wetlands Database (Meyer et al. 2020). This dataset consists of shapefiles with attributes such as lake surface area, total volume, average depth, geographic coordinates of pour points, and more (Meyer er al. 2020). 
+
+*The Global Surface Water Dataset, derived from LANDSAT imagery and hosted by the Joint Research Centre (JRC),  Subsetted data from this dataset are availabile via Google Earth Engine (Meyer et al. 2020).
+
+Reference:
+
+Meyer, MF, Labou, SG, Cramer, AN, Brousil, MR, & Luff, BT. (2020). The global lake area, climate, and population dataset. Scientific Data, 7(1), 1–12. [https://doi.org/10.1038/s41597-020-0517-4]
 
